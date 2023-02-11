@@ -19,8 +19,9 @@ namespace Web_API__Ventas.Controladores
 
         [HttpGet]
         [Route("")]
-        public List<Producto> Listar(string descripcion, int nIdSucursal, int tipoBusqueda)
+        public List<Producto> Listar(int nIdSucursal, int tipoBusqueda, string descripcion = "")
         {
+            descripcion = descripcion == null ? "" : descripcion;
             return producto.ListarProductos(descripcion, nIdSucursal, tipoBusqueda);
         }
 
@@ -31,8 +32,8 @@ namespace Web_API__Ventas.Controladores
             return producto.RecuperarProducto(nIdProducto);
         }
 
-        [HttpDelete]
-        [Route("")]
+        [HttpGet]
+        [Route("Eliminar")]
         public int Eliminar(int nIdProducto)
         {
             return producto.EliminarProducto(nIdProducto);

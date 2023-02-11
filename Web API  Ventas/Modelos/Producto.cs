@@ -12,7 +12,7 @@ namespace Web_API__Ventas.Modelos
         public int nIdCategoria { get; set; }
         public int nIdSucursal { get; set; }
         public double dPrecioVenta { get; set; }
-        public bool bEstado { get; set; }
+        public int bEstado { get; set; }
 
 
 
