@@ -28,6 +28,8 @@ builder.Services.AddScoped<IProducto , ProductoService>();
 builder.Services.AddScoped<ICConexion , CConexionBueno>();
 builder.Services.AddScoped<ICategoria , CategoriaService>();
 builder.Services.AddScoped<ISucursal , SucursalService>();
+builder.Services.AddScoped<IOperacion, OperacionService>();
+
 builder.Services.AddControllers(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
 var app = builder.Build();
