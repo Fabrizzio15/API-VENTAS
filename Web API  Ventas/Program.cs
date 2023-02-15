@@ -29,6 +29,8 @@ builder.Services.AddScoped<ICConexion , CConexionBueno>();
 builder.Services.AddScoped<ICategoria , CategoriaService>();
 builder.Services.AddScoped<ISucursal , SucursalService>();
 builder.Services.AddScoped<IOperacion, OperacionService>();
+builder.Services.AddScoped<IOperacionProducto, OperacionProductoService>();
+builder.Services.AddScoped<IInventario, InventarioService>();
 
 builder.Services.AddControllers(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 

@@ -11,6 +11,6 @@ namespace Web_API__Ventas.Interfaces
         List<Producto> RecuperarProducto(int nIdProducto);
         int EliminarProducto(int nIdProductos);
 
-
+        List<Producto> BuscarProductoCodBarras(string cod);
     }
 }

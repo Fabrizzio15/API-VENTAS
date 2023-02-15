@@ -13,6 +13,7 @@ namespace Web_API__Ventas.Modelos
         public int nIdSucursal { get; set; }
         public double dPrecioVenta { get; set; }
         public int bEstado { get; set; }
+        public double stock { get; set; }
 
 
 

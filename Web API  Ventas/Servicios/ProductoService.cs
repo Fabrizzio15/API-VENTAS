@@ -10,6 +10,36 @@ namespace Web_API__Ventas.Servicios
         {
         }
 
+        public List<Producto> BuscarProductoCodBarras(string cod)
+        {
+            List<Producto>? listaList = new List<Producto>();
+            try
+            {
+                DataTable lista = new DataTable();
+
+
+                lista = this.conexion.TraerDataTable("prc_Producto_BuscarCodigo", cod);
+                foreach (DataRow row in lista.Rows)
+                {
+                    Producto producto = new Producto();
+                    producto.nIdProducto = int.Parse(row["id"].ToString());
+                    producto.sDescripcion = row["descripcion"].ToString();
+                    producto.sCodBarras = row["codBarras"].ToString();
+                    producto.nIdCategoria = int.Parse(row["categoria"].ToString());
+                    producto.nIdSucursal = int.Parse(row["sucursalId"].ToString());
+                    producto.stock = double.Parse(row["stock"].ToString());
+                    producto.dPrecioVenta = double.Parse(row["precioVenta"].ToString());
+                    producto.bEstado = int.Parse(row["sucursalId"].ToString());
+                    listaList.Add(producto);
+                }
+                this.conexion.Dispose();
+                return listaList;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
         public List<Producto> ListarProductos(string descripcion, int nIdSucursal, int tipoBusqueda)
         {
             List<Producto>? listaList = new List<Producto>();

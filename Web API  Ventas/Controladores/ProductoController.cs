@@ -33,6 +33,13 @@ namespace Web_API__Ventas.Controladores
         }
 
         [HttpGet]
+        [Route("BusquedaCodigo")]
+        public List<Producto> BusquedaPorCodigo(string codBarras)
+        {
+            return producto.BuscarProductoCodBarras(codBarras);
+        }
+
+        [HttpGet]
         [Route("Eliminar")]
         public int Eliminar(int nIdProducto)
         {
