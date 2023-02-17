@@ -42,9 +42,39 @@ namespace Web_API__Ventas.Servicios
                     inventario.sOperacionSerie =row["sserie"].ToString();
                     inventario.stock = double.Parse(row["stock"].ToString());
                     inventario.fechaFinal = row["fecha"].ToString();
-                                
+                    inventario.dSaldoCuenta = double.Parse(row["dSaldoCuenta"].ToString());
+
                     listaList.Add(inventario);
                 }
+                this.conexion.Dispose();
+                return listaList;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+
+        }
+
+        public List<object> InventarioResumen(int nIdProducto)
+        {
+            List<object>? listaList = new List<object>();
+            try
+            {
+                DataSet lista = new DataSet();
+
+
+                lista = this.conexion.TraerDataSet("prc_Inventario_Resumen", nIdProducto);
+
+                object resumen = new
+                {
+                    vCantidad = double.Parse(lista.Tables[0].Rows[0]["vCantidad"].ToString()),
+                    vTotal = double.Parse(lista.Tables[1].Rows[0]["vTotal"].ToString()),
+                    cCantidad = double.Parse(lista.Tables[2].Rows[0]["cCantidad"].ToString()),
+                    cTotal = double.Parse(lista.Tables[3].Rows[0]["cTotal"].ToString()),
+                    
+                };              
+                listaList.Add(resumen);
                 this.conexion.Dispose();
                 return listaList;
             }

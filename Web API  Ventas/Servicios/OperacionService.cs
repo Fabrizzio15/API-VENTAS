@@ -149,7 +149,7 @@ namespace Web_API__Ventas.Servicios
 
         }
 
-        public byte[] GenerateTicket(int id = 10)
+        public (byte[],string serie) GenerateTicket(int id = 10)
         {
 
             // Crear un documento PDF con iTextSharp
@@ -270,7 +270,7 @@ namespace Web_API__Ventas.Servicios
             // Cerrar el documento
             documento.Close();
 
-            return memoryStream.ToArray();
+            return (memoryStream.ToArray(), list[0].serie);
 
         }
 

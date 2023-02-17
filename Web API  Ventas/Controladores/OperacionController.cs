@@ -49,14 +49,17 @@ namespace Web_API__Ventas.Controladores
             string ok = operacion.InsertarOperacion(/*dFechaOperacion,*/ tipoOperacion, dMontoTotal, nIdVendedor, nIdSucursal, nIdPersona, sSerie, sCorrelativo, detalles);
             return ok;
         }
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("PDF")]
         public IActionResult TicketVenta(int id)
         {
             // Lógica para generar el ticket de venta
-            byte[] ticketContent = operacion.GenerateTicket(id);
+            byte[] ticketContent;
+            string serie;
+            (ticketContent, serie) = operacion.GenerateTicket(id);
 
             // Devolver el ticket como un archivo descargable
-            return File(ticketContent, "application/pdf", "ticket.pdf");
+            return File(ticketContent, "application/pdf", serie + ".pdf");
         }
 
     }

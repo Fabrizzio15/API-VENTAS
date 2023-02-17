@@ -22,5 +22,12 @@ namespace Web_API__Ventas.Controladores
         {
             return _inventario.ListarInventario(nIdProducto, fInicial, fFinal);
         }
+
+        [HttpGet]
+        [Route("Resumen")]
+        public List<object> Resumen(int nIdProducto)
+        {
+            return _inventario.InventarioResumen(nIdProducto);
+        }
     }
 }
