@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.IO;
 using Web_API__Ventas.Interfaces;
 using Web_API__Ventas.Modelos;
+using Web_API__Ventas.Servicios;
 
 namespace Web_API__Ventas.Controladores
 {
@@ -21,10 +23,10 @@ namespace Web_API__Ventas.Controladores
 
         [HttpGet]
         [Route("")]
-        public List<Operacion> Listar(string fechaInicio, string fechaFin, string descripcion = "")
+        public DTOPaginacion Listar(string fechaInicio, string fechaFin, string descripcion = "", int pagina = 0)
         {
             descripcion = descripcion == null ? "" : descripcion;
-            return operacion.ListarOperacionVentas(fechaInicio, fechaFin, descripcion);
+            return operacion.ListarOperacionVentas(fechaInicio, fechaFin, descripcion, pagina);
         }
         [HttpGet]
         [Route("ListarCompras")]
@@ -49,6 +51,15 @@ namespace Web_API__Ventas.Controladores
             string ok = operacion.InsertarOperacion(/*dFechaOperacion,*/ tipoOperacion, dMontoTotal, nIdVendedor, nIdSucursal, nIdPersona, sSerie, sCorrelativo, detalles);
             return ok;
         }
+
+        [HttpPost]
+        [Route("Eliminar")]
+        public string EliminarOperacion(string sSerie, string sCorrelativo, int nIdOperacion)
+        {
+            string ok = operacion.EliminarOperacion(sSerie,sCorrelativo,nIdOperacion);
+            return ok;
+        }
+
         [HttpGet]
         [Route("PDF")]
         public IActionResult TicketVenta(int id)
@@ -60,6 +71,17 @@ namespace Web_API__Ventas.Controladores
 
             // Devolver el ticket como un archivo descargable
             return File(ticketContent, "application/pdf", serie + ".pdf");
+        }
+
+        [HttpGet]
+        [Route("Reporte")]
+        public IActionResult ReporteVentas(string fInicial, string fFinal)
+        {
+            // Lógica para generar el ticket de venta
+            byte[] reporte = operacion.ReporteVentas(fInicial, fFinal);
+
+            // Devolver el ticket como un archivo descargable
+            return File(reporte, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "report.xlsx");
         }
 
     }

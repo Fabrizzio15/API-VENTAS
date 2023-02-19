@@ -1,10 +1,14 @@
 ﻿using iTextSharp.text;
 using iTextSharp.text.pdf;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System.Data;
+using System.Drawing;
 using System.Reflection.Metadata;
 using Web_API__Ventas.Interfaces;
 using Web_API__Ventas.Modelos;
 using static iTextSharp.text.pdf.AcroFields;
+using Rectangle = iTextSharp.text.Rectangle;
 
 namespace Web_API__Ventas.Servicios
 {
@@ -17,29 +21,34 @@ namespace Web_API__Ventas.Servicios
             this.producto = producto;
             this.inventario = inventario;
         }
-        public List<Operacion> ListarOperacionVentas(string fechaInicio, string fechaFin, string sDescripcion)
+        public DTOPaginacion ListarOperacionVentas(string fechaInicio, string fechaFin, string sDescripcion, int pagina)
         {
+            DTOPaginacion paginacion = new DTOPaginacion();
             List<Operacion>? listaList = new List<Operacion>();
             try
             {
-                DataTable lista = new DataTable();
+                DataSet resultado = new DataSet();
 
-
-                lista = this.conexion.TraerDataTable("prc_OperacionVentasListar", sDescripcion);
-                foreach (DataRow row in lista.Rows)
+                resultado = this.conexion.TraerDataSet("prc_OperacionVentasListar", fechaInicio, fechaFin, sDescripcion, pagina);
+                foreach (DataRow row in resultado.Tables[0].Rows)
                 {
                     Operacion operacion = new Operacion();
                     operacion.idOperacion = int.Parse(row["idOperacion"].ToString());
                     operacion.fechaOperacion = row["fechaOperacion"].ToString();
                     operacion.monto = double.Parse(row["monto"].ToString());
-                    operacion.usuario = row["usuario"].ToString();
+                    operacion.usuario = row["sNombres"].ToString();
                     operacion.nombreSucursal = row["nombreSucursal"].ToString();
                     operacion.RazonSocial = row["RazonSocial"].ToString();
                     operacion.Correlativo = row["Correlativo"].ToString();
+                    int estado = row["bEstado"].ToString() == "True" ? 1 : 0;
+                    operacion.bEstado = estado;
                     listaList.Add(operacion);
                 }
+                paginacion.TotalPaginas= int.Parse(resultado.Tables[1].Rows[0]["total"].ToString());
+                paginacion.operaciones = listaList;
                 this.conexion.Dispose();
-                return listaList;
+
+                return paginacion;
             }
             catch (Exception e)
             {
@@ -93,12 +102,12 @@ namespace Web_API__Ventas.Servicios
 
         }
  
-        public string InsertarOperacion(/*string dFechaOperacion,*/int tipoOperacion,double dMontoTotal,int nIdVendedor,int nIdSucursal,string nIdPersona,string sSerie,string sCorrelativo,List<DTOProductos> detalles)
+        public string InsertarOperacion(int tipoOperacion,double dMontoTotal,int nIdVendedor,int nIdSucursal,string nIdPersona,string sSerie,string sCorrelativo,List<DTOProductos> detalles)
         {
            
             try
             {
-                int nIdOperacion = int.Parse(this.conexion.TraerValor("prc_Operacion_Insertar", /*dFechaOperacion,*/ tipoOperacion,dMontoTotal, nIdVendedor, nIdSucursal, nIdPersona, sSerie, sCorrelativo));
+                int nIdOperacion = int.Parse(this.conexion.TraerValor("prc_Operacion_Insertar", tipoOperacion,dMontoTotal, nIdVendedor, nIdSucursal, nIdPersona, sSerie, sCorrelativo));
                 foreach (DTOProductos op in detalles) 
                 {
                     string value = producto.InsertarDetalle(op.nIdProducto, op.cantidad, op.precioVenta, nIdOperacion);
@@ -148,12 +157,36 @@ namespace Web_API__Ventas.Servicios
             }
 
         }
+        public string EliminarOperacion( string sSerie, string sCorrelativo, int nIdOperacion)
+        {
 
+            try
+            {
+                DataTable productos = this.conexion.TraerDataTable("prc_Operacion_Eliminar", nIdOperacion);
+                foreach (DataRow op in productos.Rows)
+                {
+                    int inventarioInsertar = inventario.InsertarInventario(
+                        int.Parse(op["nIdProducto"].ToString()),
+                        2,
+                        double.Parse(op["nCantidad"].ToString()),
+                        double.Parse(op["dPrecioVenta"].ToString()),
+                        int.Parse(op["nIdOperacion"].ToString()),
+                        sSerie,
+                        sCorrelativo);
+                }
+                return "ok";
+            }
+            catch (Exception e)
+            {
+                return "no";
+            }
+
+        }
         public (byte[],string serie) GenerateTicket(int id = 10)
         {
 
             // Crear un documento PDF con iTextSharp
-            var ticketSize = new Rectangle(200, 500);
+            var ticketSize = new Rectangle(200, 350);
             iTextSharp.text.Document documento = new iTextSharp.text.Document(ticketSize, 4, 4, 0, 0);
             MemoryStream memoryStream = new MemoryStream();
             PdfWriter writer = PdfWriter.GetInstance(documento, memoryStream);
@@ -162,15 +195,17 @@ namespace Web_API__Ventas.Servicios
             documento.Open();
 
             // Agregar el logo
-            Image logo = Image.GetInstance("Servicios/logoTienda.jpeg");
-            logo.ScaleAbsolute(200f, 200f);
+            iTextSharp.text.Image logo = iTextSharp.text.Image.GetInstance("Servicios/Comercialgrande.jpg");
+            logo.ScaleAbsolute(150f, 70f);
+            logo.Alignment = iTextSharp.text.Image.ALIGN_CENTER | iTextSharp.text.Image.ALIGN_MIDDLE;
+
             documento.Add(logo);
 
             // Agregar la descripción de la tienda
-            Paragraph descripcionTienda = new Paragraph("DistribuidoraA&R", FontFactory.GetFont(FontFactory.HELVETICA, 12f));
-            descripcionTienda.Alignment = Element.ALIGN_CENTER;
-            descripcionTienda.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
-            documento.Add(descripcionTienda);
+            //Paragraph descripcionTienda = new Paragraph("DistribuidoraA&R", FontFactory.GetFont(FontFactory.HELVETICA, 12f));
+            //descripcionTienda.Alignment = Element.ALIGN_CENTER;
+            //descripcionTienda.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
+            //documento.Add(descripcionTienda);
             //DIRECCION 
             Paragraph DireccionTienda = new Paragraph("Calle bolivar s/n Calca, mercado modelo", FontFactory.GetFont(FontFactory.HELVETICA, 9f));
             DireccionTienda.Alignment = Element.ALIGN_CENTER;
@@ -266,12 +301,95 @@ namespace Web_API__Ventas.Servicios
             totalTexto.Alignment = Element.ALIGN_RIGHT;
             totalTexto.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
             documento.Add(totalTexto);
+            documento.Add(lineaDivisoria);
 
+            Paragraph gracias = new Paragraph("GRACIAS POR SU COMPRA!", FontFactory.GetFont(FontFactory.HELVETICA, 8f));
+            gracias.Alignment = Element.ALIGN_CENTER;
+            gracias.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
+            documento.Add(gracias);
             // Cerrar el documento
+
             documento.Close();
 
             return (memoryStream.ToArray(), list[0].serie);
 
+        }
+
+        public byte[] ReporteVentas(string fechaInicio, string fechaFin)
+        {
+            DataTable lista = new DataTable();
+            try
+            {
+
+                lista = this.conexion.TraerDataTable("prc_Operacion_Exportar", fechaInicio, fechaFin);
+                this.conexion.Dispose();
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+            int row = 3;
+            double total = 0;
+            var stream = new MemoryStream();
+            Color primary = ColorTranslator.FromHtml("#00b19d");
+            using (var package = new ExcelPackage(stream))
+            {
+                var ews = package.Workbook.Worksheets.Add("Report");
+                ews.Cells[1, 1].Value = "REPORTE DE VENTAS";
+                ews.Cells[1,1,1,6].Merge = true;
+                ews.Cells[1,1,1,6].Style.Font.Bold = true;
+                ews.Cells[1,1,1,6].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                ews.Cells[1, 1, 1, 6].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                ews.Cells[1, 1, 1, 6].Style.Fill.BackgroundColor.SetColor(primary);
+                ews.Cells[row, 1].Value = "SERIE";
+                ews.Cells[row, 2].Value = "FECHA";
+                ews.Cells[row, 3].Value = "CLIENTE";
+                ews.Cells[row, 4].Value = "SUCURSAL";
+                ews.Cells[row, 5].Value = "VENDEDOR";
+                ews.Cells[row, 6].Value = "TOTAL";
+                ews.Cells[row, 6].Style.Font.Bold = true;
+                ews.Cells[row, 1, row, 6].Style.Font.Bold = true;
+                ews.Cells[row, 1, row, 6].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                ews.Cells[row, 1, row, 6].Style.Fill.BackgroundColor.SetColor(primary);
+
+                row++;
+                // Crear un libro de trabajo de Excel
+
+                foreach (DataRow data in lista.Rows)
+                {
+                    // Agregar datos al archivo de Excel
+                    ews.Cells[row, 1].Value = data["serie"].ToString();
+                    ews.Cells[row, 2].Value = data["fecha"].ToString();
+                    ews.Cells[row, 3].Value = data["cliente"].ToString();
+                    ews.Cells[row, 4].Value = data["sucursal"].ToString();
+                    ews.Cells[row, 5].Value = data["vendedor"].ToString();
+                    ews.Cells[row, 6].Value = double.Parse(data["total"].ToString());
+                    ews.Cells[row, 6].Style.Numberformat.Format = "#,##0.00";
+
+                    total = total + double.Parse(data["total"].ToString());
+                    row++;
+                }
+                ews.Cells[row, 5].Style.Font.Bold = true;
+                ews.Cells[row, 5].Value = "TOTAL";  
+                ews.Cells[row, 6].Style.Font.Bold = true;
+                ews.Cells[row, 6].Style.Numberformat.Format = "#,##0.00";
+                ews.Cells[row, 6].Value = total;
+                ews.Cells[row, 5,row, 6].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                ews.Cells[row, 5,row, 6].Style.Fill.BackgroundColor.SetColor(primary);
+                ews.Column(1).AutoFit();
+                ews.Column(2).AutoFit();
+                ews.Column(3).AutoFit();
+                ews.Column(4).AutoFit();
+                ews.Column(5).AutoFit();
+                ews.Column(6).AutoFit();
+
+                // Guardar el archivo de Excel en el flujo de memoria
+                package.Save();
+            }
+
+            // Devolver el archivo de Excel como una respuesta HTTP
+            return stream.ToArray();
+            //return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "report.xlsx");
         }
 
 

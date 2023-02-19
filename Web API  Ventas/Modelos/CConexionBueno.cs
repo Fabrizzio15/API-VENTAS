@@ -1,4 +1,5 @@
 ﻿using appApiRestAsistencia.Models;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace Web_API__Ventas.Modelos
         {
             uuid = Guid.NewGuid().ToString("N");
             string bd = "PuntoVenta";
-            var cadena = "Data Source=" + "DESKTOP-DPTJEJC" + ";Initial Catalog=" + bd + ";Integrated Security=True";
+            var cadena = "Server = tcp:comercialayrcalca.database.windows.net,1433; Initial Catalog = PuntoVenta; Persist Security Info = False; User ID = fsmr159; Password =LaPurf666; MultipleActiveResultSets = False; Encrypt = True; TrustServerCertificate = False; Connection Timeout = 30";
             CadenaConexion = cadena;
             Debug.WriteLine(uuid);
         }

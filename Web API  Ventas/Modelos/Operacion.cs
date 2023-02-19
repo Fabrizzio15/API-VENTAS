@@ -11,6 +11,7 @@ namespace Web_API__Ventas.Modelos
         public string nombreSucursal { get; set; }
         public string RazonSocial { get; set; }
         public string Correlativo { get; set; }
+        public int bEstado { get; set; }
 
     }
 }

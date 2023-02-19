@@ -1,3 +1,4 @@
+using OfficeOpenXml;
 using Web_API__Ventas;
 using Web_API__Ventas.Interfaces;
 using Web_API__Ventas.Modelos;
@@ -10,18 +11,16 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-var MyAllowSpecificOrigins = "https://localhost:7152";
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-                      policy =>
-                      {
-                          policy.WithOrigins("https://localhost:7152",
-                                              "https://localhost:7152")
-                                                .AllowAnyHeader()
-                                             .AllowAnyMethod();
-                      });
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyHeader()
+               .AllowAnyMethod();
+    });
 });
+
 
 builder.Services.AddScoped<IApplicationBuilder, ApplicationBuilder>();
 builder.Services.AddScoped<IProducto , ProductoService>();
@@ -31,6 +30,7 @@ builder.Services.AddScoped<ISucursal , SucursalService>();
 builder.Services.AddScoped<IOperacion, OperacionService>();
 builder.Services.AddScoped<IOperacionProducto, OperacionProductoService>();
 builder.Services.AddScoped<IInventario, InventarioService>();
+builder.Services.AddScoped<IPersona, PersonaService>();
 
 builder.Services.AddControllers(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
@@ -46,11 +46,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.Use(async (context, next) =>
+{
+    ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // Establecer el contexto de licencia
+    await next.Invoke();
+});
 app.UseDeveloperExceptionPage();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();
