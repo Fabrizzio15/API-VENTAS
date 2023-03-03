@@ -8,6 +8,7 @@ using System.Reflection.Metadata;
 using Web_API__Ventas.Interfaces;
 using Web_API__Ventas.Modelos;
 using static iTextSharp.text.pdf.AcroFields;
+using Font = iTextSharp.text.Font;
 using Rectangle = iTextSharp.text.Rectangle;
 
 namespace Web_API__Ventas.Servicios
@@ -40,6 +41,45 @@ namespace Web_API__Ventas.Servicios
                     operacion.nombreSucursal = row["nombreSucursal"].ToString();
                     operacion.RazonSocial = row["RazonSocial"].ToString();
                     operacion.Correlativo = row["Correlativo"].ToString();
+                    operacion.nIdSunat = row["idSunat"].ToString();
+                    operacion.tipoDoc = row["tDocumento"].ToString();
+                    int estado = row["bEstado"].ToString() == "True" ? 1 : 0;
+                    operacion.bEstado = estado;
+                    listaList.Add(operacion);
+                }
+                paginacion.TotalPaginas= int.Parse(resultado.Tables[1].Rows[0]["total"].ToString());
+                paginacion.operaciones = listaList;
+                this.conexion.Dispose();
+
+                return paginacion;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+
+        }        
+        public DTOPaginacion ListarOperacionCompras(string fechaInicio, string fechaFin, string sDescripcion, int pagina)
+        {
+            DTOPaginacion paginacion = new DTOPaginacion();
+            List<Operacion>? listaList = new List<Operacion>();
+            try
+            {
+                DataSet resultado = new DataSet();
+
+                resultado = this.conexion.TraerDataSet("prc_OperacionComprasListar", fechaInicio, fechaFin, sDescripcion, pagina);
+                foreach (DataRow row in resultado.Tables[0].Rows)
+                {
+                    Operacion operacion = new Operacion();
+                    operacion.idOperacion = int.Parse(row["idOperacion"].ToString());
+                    operacion.fechaOperacion = row["fechaOperacion"].ToString();
+                    operacion.monto = double.Parse(row["monto"].ToString());
+                    operacion.usuario = row["sNombres"].ToString();
+                    operacion.nombreSucursal = row["nombreSucursal"].ToString();
+                    operacion.RazonSocial = row["RazonSocial"].ToString();
+                    operacion.Correlativo = row["Correlativo"].ToString();
+                    operacion.nIdSunat = row["idSunat"].ToString();
+                    operacion.tipoDoc = row["tDocumento"].ToString();
                     int estado = row["bEstado"].ToString() == "True" ? 1 : 0;
                     operacion.bEstado = estado;
                     listaList.Add(operacion);
@@ -56,36 +96,7 @@ namespace Web_API__Ventas.Servicios
             }
 
         }
-        public List<Operacion> ListarOperacionCompras(string fechaInicio, string fechaFin, string sDescripcion)
-        {
-            List<Operacion>? listaList = new List<Operacion>();
-            try
-            {
-                DataTable lista = new DataTable();
 
-
-                lista = this.conexion.TraerDataTable("prc_OperacionComprasListar", sDescripcion);
-                foreach (DataRow row in lista.Rows)
-                {
-                    Operacion operacion = new Operacion();
-                    operacion.idOperacion = int.Parse(row["idOperacion"].ToString());
-                    operacion.fechaOperacion = row["fechaOperacion"].ToString();
-                    operacion.monto = double.Parse(row["monto"].ToString());
-                    operacion.usuario = row["usuario"].ToString();
-                    operacion.nombreSucursal = row["nombreSucursal"].ToString();
-                    operacion.RazonSocial = row["RazonSocial"].ToString();
-                    operacion.Correlativo = row["Correlativo"].ToString();
-                    listaList.Add(operacion);
-                }
-                this.conexion.Dispose();
-                return listaList;
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-
-        }
         public int ObtenerCorrelativo(string serie)
         {
             try
@@ -102,12 +113,12 @@ namespace Web_API__Ventas.Servicios
 
         }
  
-        public string InsertarOperacion(int tipoOperacion,double dMontoTotal,int nIdVendedor,int nIdSucursal,string nIdPersona,string sSerie,string sCorrelativo,List<DTOProductos> detalles)
+        public string InsertarOperacion(int tipoOperacion,double dMontoTotal,int nIdVendedor,int nIdSucursal,string nIdPersona,string sSerie,string sCorrelativo,string nidSunat,string fechaEmision,List<DTOProductos> detalles)
         {
            
             try
             {
-                int nIdOperacion = int.Parse(this.conexion.TraerValor("prc_Operacion_Insertar", tipoOperacion,dMontoTotal, nIdVendedor, nIdSucursal, nIdPersona, sSerie, sCorrelativo));
+                int nIdOperacion = int.Parse(this.conexion.TraerValor("prc_Operacion_Insertar", tipoOperacion,dMontoTotal, nIdVendedor, nIdSucursal, nIdPersona, sSerie, sCorrelativo, nidSunat, fechaEmision));
                 foreach (DTOProductos op in detalles) 
                 {
                     string value = producto.InsertarDetalle(op.nIdProducto, op.cantidad, op.precioVenta, nIdOperacion);
@@ -182,6 +193,32 @@ namespace Web_API__Ventas.Servicios
             }
 
         }
+        public string EliminarOperacionCompras(int nIdOperacion)
+        {
+
+            try
+            {
+                DataTable productos = this.conexion.TraerDataTable("prc_Operacion_Eliminar", nIdOperacion);
+                foreach (DataRow op in productos.Rows)
+                {
+                    int inventarioInsertar = inventario.InsertarInventario(
+                        int.Parse(op["nIdProducto"].ToString()),
+                        3,
+                        double.Parse(op["nCantidad"].ToString()),
+                        double.Parse(op["dPrecioVenta"].ToString()),
+                        int.Parse(op["nIdOperacion"].ToString()),
+                        sSerie,
+                        sCorrelativo);
+                }
+                return "ok";
+            }
+            catch (Exception e)
+            {
+                return "no";
+            }
+
+        }
+
         public (byte[],string serie) GenerateTicket(int id = 10)
         {
 
@@ -195,24 +232,28 @@ namespace Web_API__Ventas.Servicios
             documento.Open();
 
             // Agregar el logo
-            iTextSharp.text.Image logo = iTextSharp.text.Image.GetInstance("Servicios/Comercialgrande.jpg");
-            logo.ScaleAbsolute(150f, 70f);
-            logo.Alignment = iTextSharp.text.Image.ALIGN_CENTER | iTextSharp.text.Image.ALIGN_MIDDLE;
-
-            documento.Add(logo);
+            //iTextSharp.text.Image logo = iTextSharp.text.Image.GetInstance("Servicios/Comercialgrande.jpg");
+            //logo.ScaleAbsolute(150f, 70f);
+            //logo.Alignment = iTextSharp.text.Image.ALIGN_CENTER | iTextSharp.text.Image.ALIGN_MIDDLE;
+            //
+            //documento.Add(logo);
 
             // Agregar la descripción de la tienda
-            //Paragraph descripcionTienda = new Paragraph("DistribuidoraA&R", FontFactory.GetFont(FontFactory.HELVETICA, 12f));
-            //descripcionTienda.Alignment = Element.ALIGN_CENTER;
-            //descripcionTienda.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
-            //documento.Add(descripcionTienda);
-            //DIRECCION 
-            Paragraph DireccionTienda = new Paragraph("Calle bolivar s/n Calca, mercado modelo", FontFactory.GetFont(FontFactory.HELVETICA, 9f));
+            Font fuente = FontFactory.GetFont(FontFactory.HELVETICA, 12f);
+            fuente.SetStyle(Font.BOLD);
+
+
+            Paragraph descripcionTienda = new Paragraph("DISTRIBUCIONES A & R E.I.R.L.", fuente);
+            descripcionTienda.Alignment = Element.ALIGN_CENTER;
+            descripcionTienda.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
+            documento.Add(descripcionTienda);
+            //DIRECCION
+            Paragraph DireccionTienda = new Paragraph("CAL. MARIANO DE LOS SANTOS  KM. 658, CALCA - CUSCO", FontFactory.GetFont(FontFactory.HELVETICA, 9f));
             DireccionTienda.Alignment = Element.ALIGN_CENTER;
             DireccionTienda.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
             documento.Add(DireccionTienda);
             //RUC
-            Paragraph RUCTienda = new Paragraph("R.U.C. 10700995564", FontFactory.GetFont(FontFactory.HELVETICA, 9f));
+            Paragraph RUCTienda = new Paragraph("R.U.C. 20610442553", FontFactory.GetFont(FontFactory.HELVETICA, 9f));
             RUCTienda.Alignment = Element.ALIGN_CENTER;
             RUCTienda.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
             documento.Add(RUCTienda);
@@ -226,8 +267,15 @@ namespace Web_API__Ventas.Servicios
             tDocumento.Alignment = Element.ALIGN_CENTER;
             tDocumento.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
             documento.Add(tDocumento);
-            //TITULO (TIPO DE COMPROBANTE)
+            //OBTENCION DE DATOS
             List<TicketOperacion> list = TicketOperacion(id);
+            //FECHA 
+            Paragraph tFecha = new Paragraph(("EMISIÓN: "+ list[0].fecha), FontFactory.GetFont(FontFactory.HELVETICA, 8f));
+            tFecha.Alignment = Element.ALIGN_CENTER;
+            tFecha.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
+            documento.Add(tFecha);
+
+            //TITULO (TIPO DE COMPROBANTE)
 
             Paragraph sSerieCorrelativo = new Paragraph(list[0].serie, FontFactory.GetFont(FontFactory.HELVETICA, 9f));
             sSerieCorrelativo.Alignment = Element.ALIGN_CENTER;

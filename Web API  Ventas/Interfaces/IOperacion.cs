@@ -11,7 +11,8 @@ namespace Web_API__Ventas.Interfaces
         string EliminarOperacion(string sSerie, string sCorrelativo, int nIdOperacion);
         byte[] ReporteVentas(string fechaInicio, string fechaFin);
         List<TicketOperacion> TicketOperacion(int nIdOperacion);
-        List<Operacion> ListarOperacionCompras(string fechaInicio, string fechaFin, string sDescripcion);
-        string InsertarOperacion(/*string dFechaOperacion,*/ int tipoOperacion, double dMontoTotal, int nIdVendedor, int nIdSucursal, string nIdPersona, string sSerie, string sCorrelativo, List<DTOProductos> detalles);
+        string EliminarOperacionCompras(int nIdOperacion);
+        DTOPaginacion ListarOperacionCompras(string fechaInicio, string fechaFin, string sDescripcion, int pagina);
+        string InsertarOperacion(int tipoOperacion, double dMontoTotal, int nIdVendedor, int nIdSucursal, string nIdPersona, string sSerie, string sCorrelativo, string nidSunat, string fechaEmision, List<DTOProductos> detalles);
     }
 }

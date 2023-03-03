@@ -22,6 +22,7 @@ namespace Web_API__Ventas.Servicios
                 foreach (DataRow row in lista.Rows)
                 {
                     PersonaAutocomplete persona = new PersonaAutocomplete();
+                    persona.sTipoDocumento = row["sTipoDocumento"].ToString();
                     persona.nRucPersona = row["nRucPersona"].ToString();
                     persona.srazonSocial = row["sRazonSocial"].ToString();
                     listaList.Add(persona);

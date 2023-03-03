@@ -40,16 +40,18 @@ namespace Web_API__Ventas.Servicios
                 return null;
             }
         }
-        public List<Producto> ListarProductos(string descripcion, int nIdSucursal, int tipoBusqueda)
+        public ProductoDTO ListarProductos(string descripcion, int nIdSucursal, int tipoBusqueda,int nroPagina)
         {
             List<Producto>? listaList = new List<Producto>();
+            ProductoDTO dto = new ProductoDTO();
             try
             {
-                DataTable lista = new DataTable();
+                DataSet lista = new DataSet();
 
 
-                lista = this.conexion.TraerDataTable("prc_Producto_Listar", descripcion, nIdSucursal, tipoBusqueda);
-                foreach (DataRow row in lista.Rows) {
+                lista = this.conexion.TraerDataSet("prc_Producto_Listar", descripcion, nIdSucursal, tipoBusqueda, nroPagina, nroPagina);
+                foreach (DataRow row in lista.Tables[0].Rows)
+                {
                     Producto producto = new Producto();
                     producto.nIdProducto = int.Parse(row["id"].ToString());
                     producto.sDescripcion = row["descripcion"].ToString();
@@ -58,10 +60,15 @@ namespace Web_API__Ventas.Servicios
                     producto.nIdSucursal = int.Parse(row["sucursalId"].ToString());
                     producto.dPrecioVenta = double.Parse(row["precioVenta"].ToString());
                     producto.bEstado = int.Parse(row["sucursalId"].ToString());
+                    producto.gravada = double.Parse(row["gravado"].ToString());
+                    producto.igv = double.Parse(row["igv"].ToString());
                     listaList.Add(producto);
                 }
+
+                dto.producto = listaList;
+                dto.totalItems = int.Parse(lista.Tables[1].Rows[0]["cantidad"].ToString());
                 this.conexion.Dispose();
-                return listaList;
+                return dto;
             }
             catch (Exception e)
             {
@@ -89,6 +96,8 @@ namespace Web_API__Ventas.Servicios
                     producto.nIdSucursal = int.Parse(row["sucursalId"].ToString());
                     producto.dPrecioVenta = double.Parse(row["precioVenta"].ToString());
                     producto.bEstado = int.Parse(row["sucursalId"].ToString());
+                    producto.igv = double.Parse(row["montoIGV"].ToString());
+                    producto.gravada = double.Parse(row["gravado"].ToString());
                     listaList.Add(producto);
                 }
                 this.conexion.Dispose();
@@ -118,22 +127,39 @@ namespace Web_API__Ventas.Servicios
 
         }
 
-            public int AgregarProductos(string sDescripcion, string sCodBarras, double dPrecioVenta, int nIdCategoria, int nIdSucursal)
+        public int VerificarCodigoBarras(string sDescripcion)
+        {
+            List<Producto>? listaList = new List<Producto>();
+            try
             {
-                List<Producto>? listaList = new List<Producto>();
-                try
-                {
-                    int Respuesta = 0;
-                    Respuesta = int.Parse(this.conexion.TraerValor("prc_Producto_Insertar", sDescripcion, sCodBarras, dPrecioVenta, nIdCategoria, nIdSucursal));
-                    this.conexion.Dispose();
-                    return Respuesta;
-                }
-                catch (Exception e)
-                {
-                    return 0;
-                }
-
+                int Respuesta = 0;
+                Respuesta = int.Parse(this.conexion.TraerValor("prc_VerificarCodBarras", sDescripcion));
+                this.conexion.Dispose();
+                return Respuesta;
             }
+            catch (Exception e)
+            {
+                return 0;
+            }
+
+        }
+
+        public int AgregarProductos(string sDescripcion, string sCodBarras, double dPrecioVenta, int nIdCategoria, int nIdSucursal, string unidadMedida, double igv, double gravada)
+        {
+            List<Producto>? listaList = new List<Producto>();
+            try
+            {
+                int Respuesta = 0;
+                Respuesta = int.Parse(this.conexion.TraerValor("prc_Producto_Insertar", sDescripcion, sCodBarras, dPrecioVenta, nIdCategoria, nIdSucursal, unidadMedida, gravada, igv));
+                this.conexion.Dispose();
+                return Respuesta;
+            }
+            catch (Exception e)
+            {
+                return 0;
+            }
+
+        }
 
         public int EliminarProducto(int nIdProductos)
         {

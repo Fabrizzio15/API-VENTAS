@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
-namespace appApiRestAsistencia.Models
+namespace Web_API__Ventas.Models
 {
     public class ConexionDB
     {

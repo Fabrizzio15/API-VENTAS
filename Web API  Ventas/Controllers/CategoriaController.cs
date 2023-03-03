@@ -6,9 +6,9 @@ using Web_API__Ventas.Modelos;
 
 namespace Web_API__Ventas.Controladores
 {
-    [Route("Categoria")]
     [ApiController]
-    public class CategoriaController : Controller
+    [Route("Categoria")]
+    public class CategoriaController : ControllerBase
     {
         ICategoria _categoria;
 

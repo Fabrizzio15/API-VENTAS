@@ -24,7 +24,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IApplicationBuilder, ApplicationBuilder>();
 builder.Services.AddScoped<IProducto , ProductoService>();
-builder.Services.AddScoped<ICConexion , CConexionBueno>();
+builder.Services.AddScoped<ICConexion , Conexion>();
 builder.Services.AddScoped<ICategoria , CategoriaService>();
 builder.Services.AddScoped<ISucursal , SucursalService>();
 builder.Services.AddScoped<IOperacion, OperacionService>();
@@ -35,15 +35,17 @@ builder.Services.AddScoped<IPersona, PersonaService>();
 builder.Services.AddControllers(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
 var app = builder.Build();
+app.UseDefaultFiles();
 app.UseStaticFiles(new StaticFileOptions
 {
     ServeUnknownFileTypes = true,
     DefaultContentType = "application/octet-stream"
 });
+app.UseSwagger();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    
     app.UseSwaggerUI();
 }
 app.Use(async (context, next) =>
@@ -51,6 +53,7 @@ app.Use(async (context, next) =>
     ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // Establecer el contexto de licencia
     await next.Invoke();
 });
+
 app.UseDeveloperExceptionPage();
 app.UseHttpsRedirection();
 app.UseStaticFiles();

@@ -1,6 +1,4 @@
-﻿using appApiRestAsistencia.Models;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -11,23 +9,23 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Web;
+using Web_API__Ventas.Models;
 
 namespace Web_API__Ventas.Modelos
 {
-    public class CConexionBueno : ConexionDB, ICConexion
+    public class Conexion : ConexionDB, ICConexion
     {
         private string uuid;
-        public CConexionBueno()
+        public Conexion()
         {
             GenerarConexion();
         }
         private void GenerarConexion()
         {
-            uuid = Guid.NewGuid().ToString("N");
             string bd = "PuntoVenta";
-            var cadena = "Server = tcp:comercialayrcalca.database.windows.net,1433; Initial Catalog = PuntoVenta; Persist Security Info = False; User ID = fsmr159; Password =LaPurf666; MultipleActiveResultSets = False; Encrypt = True; TrustServerCertificate = False; Connection Timeout = 30";
+            //var cadena = "Data Source=" + "DESKTOP-DPTJEJC" + ";Initial Catalog=" + bd + ";Integrated Security=True";
+            var cadena = "Server=tcp:comercialayrcalca.database.windows.net,1433;Initial Catalog=PuntoVenta;Persist Security Info=False;User ID=fsmr159;Password=LaPurf666;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
             CadenaConexion = cadena;
-            Debug.WriteLine(uuid);
         }
 
 

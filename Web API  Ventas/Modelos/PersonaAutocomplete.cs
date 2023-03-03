@@ -4,6 +4,7 @@
     {
         public string nRucPersona { get; set; }
         public string srazonSocial { get; set; }
+        public string sTipoDocumento { get; set; }
 
     }
 }

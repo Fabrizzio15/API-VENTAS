@@ -30,10 +30,10 @@ namespace Web_API__Ventas.Controladores
         }
         [HttpGet]
         [Route("ListarCompras")]
-        public List<Operacion> ListarCompras(string fechaInicio, string fechaFin, string descripcion = "")
+        public DTOPaginacion ListarCompras(string fechaInicio, string fechaFin, string descripcion = "", int pagina = 0)
         {
             descripcion = descripcion == null ? "" : descripcion;
-            return operacion.ListarOperacionCompras(fechaInicio, fechaFin, descripcion);
+            return operacion.ListarOperacionCompras(fechaInicio, fechaFin, descripcion, pagina);
         }
 
         [HttpGet]
@@ -46,9 +46,9 @@ namespace Web_API__Ventas.Controladores
 
         [HttpPost]
         [Route("Insertar")]
-        public string InsertarOperacion(/*string dFechaOperacion,*/int tipoOperacion, double dMontoTotal, int nIdVendedor, int nIdSucursal, string nIdPersona, string sSerie, string sCorrelativo, List<DTOProductos> detalles)
+        public string InsertarOperacion(/*string dFechaOperacion,*/int tipoOperacion, double dMontoTotal, int nIdVendedor, int nIdSucursal, string nIdPersona, string sSerie, string sCorrelativo, string nidSunat,string emision, List<DTOProductos> detalles)
         {
-            string ok = operacion.InsertarOperacion(/*dFechaOperacion,*/ tipoOperacion, dMontoTotal, nIdVendedor, nIdSucursal, nIdPersona, sSerie, sCorrelativo, detalles);
+            string ok = operacion.InsertarOperacion(/*dFechaOperacion,*/ tipoOperacion, dMontoTotal, nIdVendedor, nIdSucursal, nIdPersona, sSerie, sCorrelativo, nidSunat, emision, detalles);
             return ok;
         }
 
@@ -57,6 +57,14 @@ namespace Web_API__Ventas.Controladores
         public string EliminarOperacion(string sSerie, string sCorrelativo, int nIdOperacion)
         {
             string ok = operacion.EliminarOperacion(sSerie,sCorrelativo,nIdOperacion);
+            return ok;
+        }   
+        
+        [HttpPost]
+        [Route("EliminarCompras")]
+        public string EliminarOperacionCompras(int nIdOperacion)
+        {
+            string ok = operacion.EliminarOperacionCompras(nIdOperacion);
             return ok;
         }
 

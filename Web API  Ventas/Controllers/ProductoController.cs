@@ -19,10 +19,18 @@ namespace Web_API__Ventas.Controladores
 
         [HttpGet]
         [Route("")]
-        public List<Producto> Listar(int nIdSucursal, int tipoBusqueda, string descripcion = "")
+        public ProductoDTO Listar(int nIdSucursal, int tipoBusqueda, string descripcion = "", int nroPagina = 0)
         {
             descripcion = descripcion == null ? "" : descripcion;
-            return producto.ListarProductos(descripcion, nIdSucursal, tipoBusqueda);
+            return producto.ListarProductos(descripcion, nIdSucursal, tipoBusqueda, nroPagina);
+        }
+
+        [HttpGet]
+        [Route("ValidarCodBarras")]
+        public int ValidarCodBarras(string descripcion)
+        {
+            descripcion = descripcion == null ? "" : descripcion;
+            return producto.VerificarCodigoBarras(descripcion);
         }
 
         [HttpGet]
@@ -48,9 +56,9 @@ namespace Web_API__Ventas.Controladores
 
         [HttpPut]
         [Route("Agregar")]
-        public int AgregarProducto(string sDescripcion, string sCodBarras, double dPrecioVenta, int nIdCategoria, int nIdSucursal)
+        public int AgregarProducto(string sDescripcion, string sCodBarras, double dPrecioVenta, int nIdCategoria, int nIdSucursal, string unidadMedida, double igv, double gravada)
         {
-            return producto.AgregarProductos(sDescripcion,sCodBarras,dPrecioVenta,nIdCategoria,nIdSucursal);
+            return producto.AgregarProductos(sDescripcion,sCodBarras,dPrecioVenta,nIdCategoria,nIdSucursal,unidadMedida,gravada,igv);
         }
 
         [HttpPut]
