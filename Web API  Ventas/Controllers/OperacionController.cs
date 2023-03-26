@@ -23,17 +23,17 @@ namespace Web_API__Ventas.Controladores
 
         [HttpGet]
         [Route("")]
-        public DTOPaginacion Listar(string fechaInicio, string fechaFin, string descripcion = "", int pagina = 0)
+        public DTOPaginacion Listar(string fechaInicio, string fechaFin, string descripcion = "", int pagina = 0,int sucursal = 1)
         {
             descripcion = descripcion == null ? "" : descripcion;
-            return operacion.ListarOperacionVentas(fechaInicio, fechaFin, descripcion, pagina);
+            return operacion.ListarOperacionVentas(fechaInicio, fechaFin, descripcion, pagina, sucursal);
         }
         [HttpGet]
         [Route("ListarCompras")]
-        public DTOPaginacion ListarCompras(string fechaInicio, string fechaFin, string descripcion = "", int pagina = 0)
+        public DTOPaginacion ListarCompras(string fechaInicio, string fechaFin, string descripcion = "", int pagina = 0,int sucursal = 1)
         {
             descripcion = descripcion == null ? "" : descripcion;
-            return operacion.ListarOperacionCompras(fechaInicio, fechaFin, descripcion, pagina);
+            return operacion.ListarOperacionCompras(fechaInicio, fechaFin, descripcion, pagina, sucursal);
         }
 
         [HttpGet]
@@ -83,10 +83,10 @@ namespace Web_API__Ventas.Controladores
 
         [HttpGet]
         [Route("Reporte")]
-        public IActionResult ReporteVentas(string fInicial, string fFinal)
+        public IActionResult ReporteVentas(string fInicial, string fFinal, int op = 0)
         {
             // Lógica para generar el ticket de venta
-            byte[] reporte = operacion.ReporteVentas(fInicial, fFinal);
+            byte[] reporte = operacion.ReporteVentas(fInicial, fFinal, op);
 
             // Devolver el ticket como un archivo descargable
             return File(reporte, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "report.xlsx");

@@ -2,5 +2,6 @@
 {
     public interface IVendedor
     {
+        object Login(string usuario, string contrasena);
     }
 }

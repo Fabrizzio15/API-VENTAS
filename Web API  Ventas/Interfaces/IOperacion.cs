@@ -5,14 +5,14 @@ namespace Web_API__Ventas.Interfaces
 {
     public interface IOperacion
     {
-        DTOPaginacion ListarOperacionVentas(string fechaInicio, string fechaFin, string sDescripcion, int pagina);
+        DTOPaginacion ListarOperacionVentas(string fechaInicio, string fechaFin, string sDescripcion, int pagina, int sucursal);
         int ObtenerCorrelativo(string serie);
         (byte[], string serie) GenerateTicket(int id = 10);
         string EliminarOperacion(string sSerie, string sCorrelativo, int nIdOperacion);
-        byte[] ReporteVentas(string fechaInicio, string fechaFin);
+        byte[] ReporteVentas(string fechaInicio, string fechaFin, int operacion);
         List<TicketOperacion> TicketOperacion(int nIdOperacion);
         string EliminarOperacionCompras(int nIdOperacion);
-        DTOPaginacion ListarOperacionCompras(string fechaInicio, string fechaFin, string sDescripcion, int pagina);
+        DTOPaginacion ListarOperacionCompras(string fechaInicio, string fechaFin, string sDescripcion, int pagina, int sucursal);
         string InsertarOperacion(int tipoOperacion, double dMontoTotal, int nIdVendedor, int nIdSucursal, string nIdPersona, string sSerie, string sCorrelativo, string nidSunat, string fechaEmision, List<DTOProductos> detalles);
     }
 }

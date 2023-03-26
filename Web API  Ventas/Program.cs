@@ -31,6 +31,7 @@ builder.Services.AddScoped<IOperacion, OperacionService>();
 builder.Services.AddScoped<IOperacionProducto, OperacionProductoService>();
 builder.Services.AddScoped<IInventario, InventarioService>();
 builder.Services.AddScoped<IPersona, PersonaService>();
+builder.Services.AddScoped<IVendedor, VendedorService>();
 
 builder.Services.AddControllers(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
@@ -45,7 +46,6 @@ app.UseSwagger();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    
     app.UseSwaggerUI();
 }
 app.Use(async (context, next) =>

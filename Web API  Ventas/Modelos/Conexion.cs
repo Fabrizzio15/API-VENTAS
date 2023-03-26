@@ -24,7 +24,8 @@ namespace Web_API__Ventas.Modelos
         {
             string bd = "PuntoVenta";
             //var cadena = "Data Source=" + "DESKTOP-DPTJEJC" + ";Initial Catalog=" + bd + ";Integrated Security=True";
-            var cadena = "Server=tcp:comercialayrcalca.database.windows.net,1433;Initial Catalog=PuntoVenta;Persist Security Info=False;User ID=fsmr159;Password=LaPurf666;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+            //var cadena = "Server=tcp:comercialayrcalca.database.windows.net,1433;Initial Catalog=PuntoVenta;Persist Security Info=False;User ID=fsmr159;Password=LaPurf666;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+            var cadena = "Data Source=SQL8001.site4now.net;Initial Catalog=db_a95d3b_puntoventa;User Id=db_a95d3b_puntoventa_admin;Password=LaPurf666";
             CadenaConexion = cadena;
         }
 

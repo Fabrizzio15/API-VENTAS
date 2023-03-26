@@ -22,7 +22,7 @@ namespace Web_API__Ventas.Servicios
             this.producto = producto;
             this.inventario = inventario;
         }
-        public DTOPaginacion ListarOperacionVentas(string fechaInicio, string fechaFin, string sDescripcion, int pagina)
+        public DTOPaginacion ListarOperacionVentas(string fechaInicio, string fechaFin, string sDescripcion, int pagina, int sucursal)
         {
             DTOPaginacion paginacion = new DTOPaginacion();
             List<Operacion>? listaList = new List<Operacion>();
@@ -30,7 +30,7 @@ namespace Web_API__Ventas.Servicios
             {
                 DataSet resultado = new DataSet();
 
-                resultado = this.conexion.TraerDataSet("prc_OperacionVentasListar", fechaInicio, fechaFin, sDescripcion, pagina);
+                resultado = this.conexion.TraerDataSet("prc_OperacionVentasListar", fechaInicio, fechaFin, sDescripcion, pagina, sucursal);
                 foreach (DataRow row in resultado.Tables[0].Rows)
                 {
                     Operacion operacion = new Operacion();
@@ -59,7 +59,7 @@ namespace Web_API__Ventas.Servicios
             }
 
         }        
-        public DTOPaginacion ListarOperacionCompras(string fechaInicio, string fechaFin, string sDescripcion, int pagina)
+        public DTOPaginacion ListarOperacionCompras(string fechaInicio, string fechaFin, string sDescripcion, int pagina, int sucursal)
         {
             DTOPaginacion paginacion = new DTOPaginacion();
             List<Operacion>? listaList = new List<Operacion>();
@@ -67,7 +67,7 @@ namespace Web_API__Ventas.Servicios
             {
                 DataSet resultado = new DataSet();
 
-                resultado = this.conexion.TraerDataSet("prc_OperacionComprasListar", fechaInicio, fechaFin, sDescripcion, pagina);
+                resultado = this.conexion.TraerDataSet("prc_OperacionComprasListar", fechaInicio, fechaFin, sDescripcion, pagina, sucursal);
                 foreach (DataRow row in resultado.Tables[0].Rows)
                 {
                     Operacion operacion = new Operacion();
@@ -118,7 +118,7 @@ namespace Web_API__Ventas.Servicios
            
             try
             {
-                int nIdOperacion = int.Parse(this.conexion.TraerValor("prc_Operacion_Insertar", tipoOperacion,dMontoTotal, nIdVendedor, nIdSucursal, nIdPersona, sSerie, sCorrelativo, nidSunat, fechaEmision));
+                int nIdOperacion = int.Parse(this.conexion.TraerValor("prc_Operacion_Insertar", tipoOperacion,dMontoTotal, nIdVendedor, nIdSucursal, nIdPersona, sSerie, sCorrelativo, nidSunat==null ? "" : nidSunat, fechaEmision));
                 foreach (DTOProductos op in detalles) 
                 {
                     string value = producto.InsertarDetalle(op.nIdProducto, op.cantidad, op.precioVenta, nIdOperacion);
@@ -207,8 +207,9 @@ namespace Web_API__Ventas.Servicios
                         double.Parse(op["nCantidad"].ToString()),
                         double.Parse(op["dPrecioVenta"].ToString()),
                         int.Parse(op["nIdOperacion"].ToString()),
-                        sSerie,
-                        sCorrelativo);
+                        op["serie"].ToString(),
+                        op["correlativo"].ToString()
+                        );
                 }
                 return "ok";
             }
@@ -356,6 +357,15 @@ namespace Web_API__Ventas.Servicios
             gracias.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
             documento.Add(gracias);
             // Cerrar el documento
+            Paragraph espacio = new Paragraph("");
+            lineaDivisoria.Alignment = Element.ALIGN_CENTER;
+            lineaDivisoria.Font = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8f);
+            documento.Add(espacio);
+            documento.Add(espacio);
+            documento.Add(espacio);
+            documento.Add(espacio);
+            documento.Add(espacio);
+            documento.Add(espacio);
 
             documento.Close();
 
@@ -363,13 +373,12 @@ namespace Web_API__Ventas.Servicios
 
         }
 
-        public byte[] ReporteVentas(string fechaInicio, string fechaFin)
+        public byte[] ReporteVentas(string fechaInicio, string fechaFin, int operacion)
         {
             DataTable lista = new DataTable();
             try
             {
-
-                lista = this.conexion.TraerDataTable("prc_Operacion_Exportar", fechaInicio, fechaFin);
+                lista = this.conexion.TraerDataTable("prc_Operacion_Exportar", fechaInicio, fechaFin, operacion);
                 this.conexion.Dispose();
             }
             catch (Exception e)
